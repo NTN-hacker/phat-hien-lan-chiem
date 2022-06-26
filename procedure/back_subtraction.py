@@ -32,12 +32,12 @@ class BackSubtraction(object):
         bg_cropImageFill_Blur = self.blur_color_img(image_background)
         fg_cropImageFill_Blur = self.blur_color_img(fg_cropImageFill_hsl)
         # display_image(fg_cropImageFill_Blur)
-        
-        mask = fg_cropImageFill_Blur - bg_cropImageFill_Blur
+        #cần chuyển đổi ma trận ảnh về kiểu type trước khi thực hiện hiệu trừ
+        mask = fg_cropImageFill_Blur - bg_cropImageFill_Blur #ma trận ảnh được biểu diễn dưới dạng uming8 do đó nó sẽ không lưu số âm
         mask = np.abs(mask)
         # blur_color_img(mask)
         mask_hsl = cv2.cvtColor(mask, cv2.COLOR_RGB2HLS)
-
+        # chủ yếu thay đổi về cường độ sáng còn thay đổi về màu thì ít do đó, ta cần quan tâm sự thay đổi về độ màu
         self.lower_thread = np.array([8, 100, 50])
         self.upper_thread = np.array([180, 255, 255])
         self.mask_test = cv2.inRange(mask_hsl, self.lower_thread, self.upper_thread)

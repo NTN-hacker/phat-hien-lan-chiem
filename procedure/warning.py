@@ -9,6 +9,8 @@ from diff_frame import DifferenceFrame
 from parameter.setting import *
 from distance_point import *
 import streamlit as st
+import compute_iou
+import math
 
 class WarningObject(object):
 
@@ -33,7 +35,7 @@ class WarningObject(object):
 
     def detect(self, img):
         flag = False
-        cordinate, fg = DetectObject().detect_Obj(img, cv2.imread("procedure\parameter\\base_image\dbp_bt_background.png"))
+        cordinate, fg = DetectObject().detect_Obj(self.id, img, cv2.imread("procedure\parameter\\base_image\dbp_bt_background.png"))
 
         #Instert new image to stack
         self.stack.pop()
@@ -43,7 +45,7 @@ class WarningObject(object):
         percentages = []
         if (cordinate != 0):
             for i in range(self.stack.len - 2):
-                diff_frame_ = DifferenceFrame().caculate_diff_frame(self.stack.pop(), self.stack.stack[i], cordinate)
+                diff_frame_ = DifferenceFrame().caculate_diff_frame(self.id, self.stack.pop(), self.stack.stack[i], cordinate)
                 percentages = percentages + [diff_frame_]
             percentage = np.mean(percentages)
             print(percentage)
@@ -52,14 +54,21 @@ class WarningObject(object):
             if (percentage > Parameter[self.id]["threahold"]["percentage"]):
                 pass
             else:        
-                left_distance = (distance(getPoint(cordinate)[0], getPoint(self.cordinate_threshold[-1])[0]))
-                right_distance = (distance(getPoint(cordinate)[1], getPoint(self.cordinate_threshold[-1])[1]))             
-                if (left_distance > 2 and right_distance > 2):
+                # left_distance = (distance(getPoint(cordinate)[0], getPoint(self.cordinate_threshold[-1])[0]))
+                # right_distance = (distance(getPoint(cordinate)[1], getPoint(self.cordinate_threshold[-1])[1]))     
+                iou = compute_iou.get_iou(cordinate, self.cordinate_threshold[-1])  
+                print(iou)
+                # if (left_distance > 2 and right_distance > 2):
+                if iou < 0.15:
                     self.cordinate_threshold = self.cordinate_threshold + [cordinate]
                     flag = True
+                    img = self.img.copy()
+                    cordinate_overview = map(lambda x, y: x + y, cordinate, Parameter[self.id]["roi"][0])
+                    temp = list(cordinate_overview) # vì khi khởi tạo, giá trị bị xóa sau một lần gọi
+                    cv2.rectangle(img, temp[:2], temp[2:], (255, 0, 0), 1)
                 else:
                     pass
-        return flag, fg
+        return flag, fg, img
 
     # def request(self):
     #     i = 0

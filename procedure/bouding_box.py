@@ -15,7 +15,7 @@ def boudingBox(fg_cropImageRoi, fgMask):
         w = stats[i, cv2.CC_STAT_WIDTH]
         h = stats[i, cv2.CC_STAT_HEIGHT]
         area = stats[i, cv2.CC_STAT_AREA]
-        if (area > 300) and (w > 30) and (h > 30) and (w < fg.shape[0]) and (h < fg.shape[1]):
+        if (area > 400) and (w > 30) and (h > 30) and (w < fg.shape[0]) and (h < fg.shape[1]): # and (x != 0) and (y != 0):
             cv2.rectangle(fg, (x, y), (x + w, y + h), (0, 255, 0), 1)
             cordinate = [x, y, x + w, y + h]
     
