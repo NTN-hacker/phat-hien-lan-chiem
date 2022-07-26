@@ -1,6 +1,11 @@
+from ast import Yield
+from operator import index
 import numpy as np
 from math import *
 from parameter.setting import *
+import cv2
+import matplotlib.pyplot as plt
+import preprocessing
 
 def get_iou(point_1, point_2):
 
@@ -24,17 +29,6 @@ def get_iou(point_1, point_2):
     # assert iou <= 1.0
     return iou
 
-iou = get_iou([11, 7, 129, 130], [13, 16, 136, 131])
-print(iou)
 
 
-cordinate  = [1, 2, 3, 4]
-listroi = [1, 2, 3, 4]
-cordinate_overview = map(lambda x, y: x + y, cordinate, Parameter["587c79e9b807da0011e33d3d"]["roi"][0])
-# c = map(lambda x, y: x + y, cordinate, listroi)
 
-c = list(cordinate_overview)
-print(c[:2], c[2:])
-# print(tuple(cordinate_overview))
-# print(cordinate_overview)
-# print(tuple(cordinate_overview))

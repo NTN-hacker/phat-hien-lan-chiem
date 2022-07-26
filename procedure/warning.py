@@ -11,16 +11,28 @@ from distance_point import *
 import streamlit as st
 import compute_iou
 import math
+import datetime
+import os
 
 class WarningObject(object):
 
     LENGTH_ROOT_FAULT = 10
+    date_time = datetime.date.today()
+    
 
 
     def __init__(self, camera_id):
         self.stack = Input().init_stack(10)
         self.id = camera_id
         self.cordinate_threshold = [[10, 6, 112, 90]]
+        self.name = Parameter[self.id]["name"]
+
+        PATH = f'test\{self.name}\\result/{self.date_time}'
+
+        try:
+            os.makedirs(PATH)
+        except OSError as error:
+            print(error)
 
         while (self.stack.len < self.LENGTH_ROOT_FAULT):
             self.stack.stack = self.stack.put(self.get_url_save_image()) 
@@ -35,17 +47,18 @@ class WarningObject(object):
 
     def detect(self, img):
         flag = False
-        cordinate, fg = DetectObject().detect_Obj(self.id, img, cv2.imread("procedure\parameter\\base_image\dbp_bt_background.png"))
+        name_file = str(self.name).split("_")[-1].lower()
+        cordinate, fg = DetectObject().detect_Obj(self.id, img, cv2.imread(f"procedure\parameter\\base_image\dbp_background.png"))
 
         #Instert new image to stack
         self.stack.pop()
         self.stack.put(img)
 
-        print(cordinate)
+        print(f"             + {cordinate}")
         percentages = []
         if (cordinate != 0):
             for i in range(self.stack.len - 2):
-                diff_frame_ = DifferenceFrame().caculate_diff_frame(self.id, self.stack.pop(), self.stack.stack[i], cordinate)
+                diff_frame_ = DifferenceFrame().caculate_diff_frame(self.id, self.name, self.stack.pop(), self.stack.stack[i], cordinate)
                 percentages = percentages + [diff_frame_]
             percentage = np.mean(percentages)
             print(percentage)
@@ -59,13 +72,29 @@ class WarningObject(object):
                 iou = compute_iou.get_iou(cordinate, self.cordinate_threshold[-1])  
                 print(iou)
                 # if (left_distance > 2 and right_distance > 2):
-                if iou < 0.15:
+                if iou < 0.2:
                     self.cordinate_threshold = self.cordinate_threshold + [cordinate]
                     flag = True
                     img = self.img.copy()
-                    cordinate_overview = map(lambda x, y: x + y, cordinate, Parameter[self.id]["roi"][0])
-                    temp = list(cordinate_overview) # vì khi khởi tạo, giá trị bị xóa sau một lần gọi
-                    cv2.rectangle(img, temp[:2], temp[2:], (255, 0, 0), 1)
+                    # fg_resize = fg.copy()
+                    # #resize to image_crop root
+                    # fg_resize = cv2.resize(fg_resize, (155, 146))
+                    #get scale
+                    scale_height = 1.26
+                    list_cordinate_scale = [math.floor(i/1.26) for i in cordinate]
+
+                    # cordinate_overview = map(lambda x, y: x + y, list_cordinate_scale, Parameter[self.id]["roi"][0])
+                    temp = list_cordinate_scale.copy() # vì khi khởi tạo, giá trị bị xóa sau một lần 
+                    print(f"toa do {temp}")
+                    cv2.rectangle(img, (temp[0] + Parameter[self.id]["roi"][0][0], temp[3]  + (Parameter[self.id]["roi"][0][3] + Parameter[self.id]["roi"][0][1] - 146)), (temp[2] + (Parameter[self.id]["roi"][0][0] + Parameter[self.id]["roi"][0][2] - 155), temp[1] +  + Parameter[self.id]["roi"][0][1]), (255, 0, 0), 1)
+                    # cv2.rectangle(img, (temp[0] + 296, temp[3] + 144), (temp[2] + 287, temp[1] + 135), (0, 255, 0), 1)
+
+                    time = datetime.datetime.now()                   
+                    print( Parameter[self.id]["name"])
+
+                    PATH_DICT = str(str(time).replace(" ","_").replace(":","-").split(".")[0])
+                    cv2.imwrite(f"test/{self.name}/result/{self.date_time}/{PATH_DICT}_result.png", img)
+                    cv2.imwrite(f"test/{self.name}/result/{self.date_time}/{PATH_DICT}_root.png", self.img)
                 else:
                     pass
         return flag, fg, img
