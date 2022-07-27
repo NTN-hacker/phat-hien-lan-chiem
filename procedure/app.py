@@ -11,16 +11,18 @@ id = ''
 
 st.header("Detect object signwalk encroachment")
 
-option = st.selectbox("How to check camera?", ("CAM_DBP", "CAM_VL_NTT", "CAM_TOKY", "CAM_SG"))
+option = st.selectbox("How to check camera?", ("CAM_DBP", "CAM_VL_NTT", "CAM_TOKY", "CAM_SG", "CAM_DTH_VTS"))
 
 if (option == 'CAM_DBP'):
     id = '587c79e9b807da0011e33d3d'
 elif (option == 'CAM_TOKY'):
     id = '589ad89eb3bf7600110283ac'
 elif (option == 'CAM_VL_NTT'):
-    id = '5ad06a0d98d8fc001102e27'
+    id = '5ad06a0d98d8fc001102e27b'
 elif (option == 'CAM_SG'):
     id = '5f000ab3942cda00169ee00b'
+elif (option == 'CAM_DTH_VTS'):
+    id = '5a8241105058170011f6eaa6'
 else:
     st.warning("Not optional! Error")
 
